@@ -1,7 +1,7 @@
 #/usr/bin/python3
 from optparse import OptionParser
-from T81.processor import Processor
-from T81 import exceptions as exp
+from processor import Processor
+import exceptions as exp
 
 
 # Handle the options and arguments

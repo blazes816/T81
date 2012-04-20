@@ -1,3 +1,5 @@
+import utils
+
 codeToRegister = {
   0x00: 'eax',
   0x01: 'ax',
@@ -16,45 +18,46 @@ class Registers(object):
         self.ecx = bytearray()
         self.edx = bytearray()
 
-        self.pc() = bytearray()
+        self.pc = bytearray()
 
         self.registers = {
           'eax': self.eax, 'ebx': self.ebx, 'ecx': self.ecx, 'edx': self.edx,
-          'pc': self.pc()
+          'pc': self.pc
         }
 
         self.registers_available = list(self.registers.keys())
 
         for r in self.registers.keys():
-            print(r)
             for b in range(8):
                 getattr(self, r).append(0x00)
 
     def __getattr__(self, name):
-        if name[:4] == 'set_':
-            print('asdf')
+        prefix, name = name[:4], name[4:]
+        if prefix == 'set_':
+            def setter(value):
+                setattr(self, name, value)
+            return setter
 
-        if name in (self.registers.keys()):
-            return self.registers[name]
+        elif prefix == 'get_':
 
-        if len(name) != 2:
-            raise AttributeError
+            if name in (self.registers.keys()):
+                return utils.pack_bytes(self.registers[name])
 
-        if (name[0] in ('a', 'b', 'c' 'd') and name[1] in ('h', 'l', 'x')):
-            return self.registers
+            if len(name) != 2:
+                raise AttributeError
+
+            if (name[0] in ('a', 'b', 'c' 'd') and name[1] in ('h', 'l', 'x')):
+                return self.registers
 
         
     def incrementPC(self, amount=0x01):
-        self.pc() = self.pc() + amount
+        self.pc = (self.get_pc + amount)
 
     def getPC(self):
-        
-        return self.pc()
+        return self.get_pc
 
     def get(self, reg):
         if len(reg) == 3:
             return self.registers[reg]
         else:
-            print('asdf')
             v = self.registers['e'+reg]
-            print(v)

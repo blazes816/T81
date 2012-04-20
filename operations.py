@@ -13,13 +13,6 @@ class Operations(object):
     def fromCode(self, code):
         return getattr(self, codeToOperation[code])
 
-    def scanRegister(self):
-        r = self.program_scanner[self.registers.getIP()]
-        self.registers.incrementIP()
-        return r
-
     def mov_r_r(self):
         a = self.program_scanner.nextRegister()
         b = self.program_scanner.nextRegister()
-        print(b)
-        print(self.registers.get(b))

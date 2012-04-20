@@ -1,8 +1,8 @@
-from . import debugger
-from . import exceptions as exp
-from .operations import Operations
-from .program_scanner import ProgramScanner
-from .registers import Registers
+import debugger
+import exceptions as exp
+from operations import Operations
+from program_scanner import ProgramScanner
+from registers import Registers
 
 REGISTERS = {'eax': 0x00, 'ebx': 0x00, 'ecx': 0x00, 'edx': 0x0}
 OPCODE_SIZE = 1
@@ -45,7 +45,9 @@ class Processor(object):
               opcode = self.program_scanner.nextOpcode()
             except IndexError:
               break
-            print(opcode)
+            print(self.registers.pc)
+            self.registers.pc = self.registers.pc + 1
+            print(self.registers.pc)
             op = self.ops.fromCode(opcode)
             op()
         pass
