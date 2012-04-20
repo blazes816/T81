@@ -7,7 +7,7 @@ from .registers import Registers
 REGISTERS = {'eax': 0x00, 'ebx': 0x00, 'ecx': 0x00, 'edx': 0x0}
 OPCODE_SIZE = 1
 
-class CPU(object):
+class Processor(object):
 
     def __init__(self, debug=False):
         # Initialize critical elements: registers, memory, etc

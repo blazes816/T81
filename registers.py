@@ -16,11 +16,11 @@ class Registers(object):
         self.ecx = bytearray()
         self.edx = bytearray()
 
-        self.pc = bytearray()
+        self.pc() = bytearray()
 
         self.registers = {
           'eax': self.eax, 'ebx': self.ebx, 'ecx': self.ecx, 'edx': self.edx,
-          'pc': self.pc
+          'pc': self.pc()
         }
 
         self.registers_available = list(self.registers.keys())
@@ -30,22 +30,26 @@ class Registers(object):
             for b in range(8):
                 getattr(self, r).append(0x00)
 
-    def __getattr(self, name):
+    def __getattr__(self, name):
+        if name[:4] == 'set_':
+            print('asdf')
+
         if name in (self.registers.keys()):
             return self.registers[name]
 
         if len(name) != 2:
-            return None
+            raise AttributeError
 
         if (name[0] in ('a', 'b', 'c' 'd') and name[1] in ('h', 'l', 'x')):
             return self.registers
 
         
     def incrementPC(self, amount=0x01):
-        self.pc = self.pc + amount
+        self.pc() = self.pc() + amount
 
     def getPC(self):
-        return self.pc
+        
+        return self.pc()
 
     def get(self, reg):
         if len(reg) == 3:

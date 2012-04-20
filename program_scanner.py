@@ -1,5 +1,4 @@
-from functools import reduce
-
+from t81.common import utils
 from .registers import codeToRegister
 
 OPCODE_SIZE = 1
@@ -25,4 +24,4 @@ class ProgramScanner(object):
 
     def stringFromSlice(self, slice_size=1):
       byte = self.memory[self.pc():self.pc() + slice_size]
-      return reduce(lambda x,y: (x << 8) + int(y, 16), byte, 0x0)
+      return utils.pack_bytes(byte)

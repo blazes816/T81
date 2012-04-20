@@ -1,6 +1,6 @@
 #/usr/bin/python3
 from optparse import OptionParser
-from T81.cpu import CPU
+from T81.processor import Processor
 from T81 import exceptions as exp
 
 
@@ -19,13 +19,13 @@ def get_options():
 # This is our main entry point into the application
 def main():
     options, args = get_options()
-    # Create CPU
-    cpu = CPU(options.debug)
+    # Create Processor
+    processor = Processor(options.debug)
 
     # Load the programe given by the user
     filename = args[0]
     try:
-        cpu.load(filename)
+        processor.load(filename)
     except exp.InvalidFile:
         print("Invalid file %s" % filename)
         exit(1)
@@ -34,7 +34,7 @@ def main():
         exit(1)
 
     # Start the processing
-    cpu.run()
+    processor.run()
 
 
 if __name__ == '__main__':

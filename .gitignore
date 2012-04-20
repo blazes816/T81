@@ -1,3 +1,4 @@
 *.t81
 .*.swp
 .*.swo
+__pycache__
