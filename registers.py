@@ -1,6 +1,6 @@
 import utils
 
-codeToRegister = {
+codeToName = {
   0x00: 'eax',
   0x01: 'ax',
   0x02: 'ah',
@@ -12,13 +12,27 @@ codeToRegister = {
 }
 
 class Registers(object):
-    def __init__(self):
-        self.eax = bytearray()
-        self.ebx = bytearray()
-        self.ecx = bytearray()
-        self.edx = bytearray()
+    @staticmethod
+    def codeToName(code):
+        return codeToName[code]
 
-        self.pc = bytearray()
+    @staticmethod
+    def sizeOf(reg):
+        if len(reg) == 3:
+            return 4
+        elif len(reg) == 2 and reg[-1] == x:
+            return 2
+        return 1
+            
+
+
+    def __init__(self):
+        self.eax = 0
+        self.ebx = 0
+        self.ecx = 0
+        self.edx = 0
+
+        self.pc = 0
 
         self.registers = {
           'eax': self.eax, 'ebx': self.ebx, 'ecx': self.ecx, 'edx': self.edx,
@@ -27,37 +41,24 @@ class Registers(object):
 
         self.registers_available = list(self.registers.keys())
 
-        for r in self.registers.keys():
-            for b in range(8):
-                getattr(self, r).append(0x00)
-
-    def __getattr__(self, name):
-        prefix, name = name[:4], name[4:]
-        if prefix == 'set_':
-            def setter(value):
-                setattr(self, name, value)
-            return setter
-
-        elif prefix == 'get_':
-
-            if name in (self.registers.keys()):
-                return utils.pack_bytes(self.registers[name])
-
-            if len(name) != 2:
-                raise AttributeError
-
-            if (name[0] in ('a', 'b', 'c' 'd') and name[1] in ('h', 'l', 'x')):
-                return self.registers
-
-        
     def incrementPC(self, amount=0x01):
-        self.pc = (self.get_pc + amount)
+        self.pc = (self.pc + amount)
 
-    def getPC(self):
-        return self.get_pc
+    def set(self, name, value):
+        if name in list(self.registers.keys()):
+            self.registers[name] = value
+        elif name in [x + y for x in ('a', 'b', 'c', 'd') for y in ('x', 'h', 'l')]:
+            print(name)
 
     def get(self, reg):
+        if type(reg) is int:
+            reg = self.codeToName(reg)
+
         if len(reg) == 3:
+            print('asdf')
             return self.registers[reg]
         else:
             v = self.registers['e'+reg]
+
+    def __repr__(self):
+        return repr(self.registers)

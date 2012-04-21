@@ -1,3 +1,5 @@
+from copy import copy
+
 import debugger
 import exceptions as exp
 from operations import Operations
@@ -35,19 +37,20 @@ class Processor(object):
         while next_byte():
             self.program_memory.append(byte)
 
+    def load_from_bytes(self, byte_array):
+        self.program_memory = copy(byte_array)
 
     def run(self):
         self.program_scanner = ProgramScanner(self.program_memory, self.registers)
         self.ops = Operations(self.program_scanner, self.main_memory,
                               self.registers)
+        print(self.registers)
         while 1:
             try:
               opcode = self.program_scanner.nextOpcode()
-            except IndexError:
+            except exp.EndOfProgram:
               break
-            print(self.registers.pc)
-            self.registers.pc = self.registers.pc + 1
-            print(self.registers.pc)
             op = self.ops.fromCode(opcode)
             op()
+            print(self.registers)
         pass

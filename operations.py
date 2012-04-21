@@ -1,6 +1,10 @@
+from registers import Registers
+
 codeToOperation = {
-  0x0: 'mov_r_r',
-  0x1: 'mov_r_r'
+  0x0: 'mov_reg_reg',
+  0x1: 'mov_reg_mem',
+  0x2: 'mov_mem_reg',
+  0x3: 'mov_reg_lit'
 }
 
 class Operations(object):
@@ -13,6 +17,15 @@ class Operations(object):
     def fromCode(self, code):
         return getattr(self, codeToOperation[code])
 
-    def mov_r_r(self):
+    def mov_reg_reg(self):
         a = self.program_scanner.nextRegister()
         b = self.program_scanner.nextRegister()
+        self.registers.set(a, self.registers.get(b))
+
+    def mov_reg_mem(self):
+        a = self.program_scanner.nextRegister()
+
+    def mov_reg_lit(self):
+        a = self.program_scanner.nextRegister()
+        b = self.program_scanner.nextBytes(Registers.sizeOf(a))
+        self.registers.set(a, b)

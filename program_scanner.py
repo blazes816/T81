@@ -1,5 +1,6 @@
 import utils
-from registers import codeToRegister
+from registers import Registers
+import exceptions as exp
 
 OPCODE_SIZE = 1
 REGISTER_SIZE = 1
@@ -9,18 +10,19 @@ class ProgramScanner(object):
       self.memory = memory
       self.registers = registers
 
-    def pc(self):
-      return self.registers.get_pc
-
     def nextOpcode(self):
-      code = self.stringFromSlice(OPCODE_SIZE)
-      return code
+      return self.nextBytes(OPCODE_SIZE)
 
     def nextRegister(self):
-      reg = self.stringFromSlice(REGISTER_SIZE)
-      return codeToRegister[reg]
+      return Registers.codeToName(self.nextBytes(REGISTER_SIZE))
 
-    def stringFromSlice(self, slice_size=1):
-      byte = self.memory[self.pc():self.pc() + slice_size]
-      self.registers.incrementPC(slice_size)
+    def nextBytes(self, size=1):
+      pc = self.registers.pc
+
+      if pc > len(self.memory):
+          raise exp.EndOfProgram
+
+      byte = self.memory[pc:pc + size]
+      self.registers.incrementPC(size)
+
       return utils.pack_bytes(byte)

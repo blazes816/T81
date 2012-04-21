@@ -1,3 +1,5 @@
 class InvalidFile(Exception):
-  pass
+    pass
 
+class EndOfProgram(Exception):
+    pass

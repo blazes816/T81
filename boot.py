@@ -9,6 +9,8 @@ def get_options():
     parser = OptionParser(usage='t816 file [options]')
     parser.add_option("-d", "--debug", dest="debug", action="store_true",
                       default=False, help="Show debug panel")
+    parser.add_option("-i", "--interpret", dest="interpret", action="store_true",
+                      default=False, help="Interpret file as TSM")
     options, args = parser.parse_args()
 
     if len(args) != 1:
@@ -24,8 +26,12 @@ def main():
 
     # Load the programe given by the user
     filename = args[0]
+    
     try:
-        processor.load(filename)
+        if options.interpret:
+            processor.load_from_bytes(Parser.parse(filename))
+        else:
+            processor.load(filename)
     except exp.InvalidFile:
         print("Invalid file %s" % filename)
         exit(1)
