@@ -30,9 +30,6 @@ class Operations(object):
     def mov_mem_reg(self):
         a = self.program_scanner.nextRegister()
         b = self.program_scanner.nextBytes(Registers.sizeOf(a))
-        print(a)
-        print(self.registers.get(a))
-        print(b)
         self.main_memory[b] = self.registers.get(a)
 
     def mov_reg_lit(self):

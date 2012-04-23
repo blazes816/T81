@@ -14,7 +14,8 @@ class ProgramScanner(object):
       return self.nextBytes(OPCODE_SIZE)
 
     def nextRegister(self):
-      return Registers.codeToName(self.nextBytes(REGISTER_SIZE))
+      a = self.nextBytes(REGISTER_SIZE)
+      return Registers.codeToName(a)
 
     def nextBytes(self, size=1):
       pc = self.registers.pc
@@ -25,5 +26,4 @@ class ProgramScanner(object):
       byte = self.memory[pc:pc + size]
       self.registers.incrementPC(size)
       b = utils.pack_bytes(byte)
-
       return b

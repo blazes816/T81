@@ -52,8 +52,6 @@ class Registers(object):
         elif len(name) == 2:
             suffix, name = name[1], 'e%sx' % name[0]
             if suffix == 'x':
-                print(self.registers[name])
-                print(self.registers[name] & 0xff)
                 self.registers[name] = (self.registers[name] & 0xffff0000) + value
             elif suffix == 'l':
                 self.registers[name] = (self.registers[name] & 0xffffff00) + value
@@ -69,9 +67,6 @@ class Registers(object):
         elif len(name) == 2:
             suffix, name = name[1], 'e%sx' % name[0]
             if suffix == 'x':
-                print(name)
-                print(int(str(self.registers[name]), 16))
-                print(self.registers[name] & 0xff)
                 return self.registers[name] & 0xFF
             elif suffix == 'l':
                 return self.registers[name] & 0x0F

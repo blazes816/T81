@@ -1,16 +1,13 @@
 from functools import reduce
 
 def pack_bytes(byte_array):
-    if len(byte_array) == 1:
-      return int(str(byte_array[0]), 16)
+    if len(byte_array) < 2:
+        try:
+          return int(str(byte_array[0]), 16)
+        except IndexError:
+          return 0
     
-    new_array = bytearray()
-    for b in byte_array:
-        new_array.extend(unpack_bytes(b))
-    byte_array = new_array
-    byte_array = bytearray([x for x in byte_array])
-
-    return int(str(reduce(lambda x,y: (x << 8) + y, byte_array, 0x0)), 16)
+    return int(reduce(lambda x, y: (x << 8) + y, byte_array[1:], byte_array[0]))
 
 def unpack_bytes(value, size=None):
     byte_array = bytearray()

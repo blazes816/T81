@@ -15,7 +15,7 @@ class Processor(object):
         # Initialize critical elements: registers, memory, etc
         self.debug = debug
         self.program_memory = []
-        self.main_memory = [None] * 256
+        self.main_memory = {}
         self.registers = Registers()
 
     def load(self, filename):
