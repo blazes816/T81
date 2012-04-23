@@ -1,0 +1,2 @@
+mov ax, 0xffff;
+mov 0x0, ax;

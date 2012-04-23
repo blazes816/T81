@@ -6,6 +6,7 @@ codeToOperation = {
   0x2: 'mov_mem_reg',
   0x3: 'mov_reg_lit'
 }
+operationToCode = {codeToOperation[x]: x for x in codeToOperation}
 
 class Operations(object):
     def __init__(self, program_scanner, main_memory,
@@ -24,6 +25,15 @@ class Operations(object):
 
     def mov_reg_mem(self):
         a = self.program_scanner.nextRegister()
+        b = self.program_scanner.nextRegister()
+
+    def mov_mem_reg(self):
+        a = self.program_scanner.nextRegister()
+        b = self.program_scanner.nextBytes(Registers.sizeOf(a))
+        print(a)
+        print(self.registers.get(a))
+        print(b)
+        self.main_memory[b] = self.registers.get(a)
 
     def mov_reg_lit(self):
         a = self.program_scanner.nextRegister()

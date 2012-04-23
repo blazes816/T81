@@ -19,10 +19,11 @@ class ProgramScanner(object):
     def nextBytes(self, size=1):
       pc = self.registers.pc
 
-      if pc > len(self.memory):
+      if pc >= len(self.memory):
           raise exp.EndOfProgram
 
       byte = self.memory[pc:pc + size]
       self.registers.incrementPC(size)
+      b = utils.pack_bytes(byte)
 
-      return utils.pack_bytes(byte)
+      return b

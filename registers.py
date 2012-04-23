@@ -1,4 +1,4 @@
-import utils
+from functools import reduce
 
 codeToName = {
   0x00: 'eax',
@@ -10,6 +10,7 @@ codeToName = {
   0x06: 'bh',
   0x07: 'bl',
 }
+nameToCode = {codeToName[x]: x for x in codeToName}
 
 class Registers(object):
     @staticmethod
@@ -20,11 +21,9 @@ class Registers(object):
     def sizeOf(reg):
         if len(reg) == 3:
             return 4
-        elif len(reg) == 2 and reg[-1] == x:
+        elif reg[1] == 'x':
             return 2
         return 1
-            
-
 
     def __init__(self):
         self.eax = 0
@@ -34,9 +33,12 @@ class Registers(object):
 
         self.pc = 0
 
+        self.stack = []
+        self.sp = 0
+
         self.registers = {
           'eax': self.eax, 'ebx': self.ebx, 'ecx': self.ecx, 'edx': self.edx,
-          'pc': self.pc
+          'pc': self.pc, 'sp': self.sp
         }
 
         self.registers_available = list(self.registers.keys())
@@ -47,18 +49,36 @@ class Registers(object):
     def set(self, name, value):
         if name in list(self.registers.keys()):
             self.registers[name] = value
-        elif name in [x + y for x in ('a', 'b', 'c', 'd') for y in ('x', 'h', 'l')]:
-            print(name)
+        elif len(name) == 2:
+            suffix, name = name[1], 'e%sx' % name[0]
+            if suffix == 'x':
+                print(self.registers[name])
+                print(self.registers[name] & 0xff)
+                self.registers[name] = (self.registers[name] & 0xffff0000) + value
+            elif suffix == 'l':
+                self.registers[name] = (self.registers[name] & 0xffffff00) + value
+            elif suffix == 'h':
+                self.registers[name] = (self.registers[name] & 0xffff00ff) + (value << 8)
 
-    def get(self, reg):
-        if type(reg) is int:
-            reg = self.codeToName(reg)
+    def get(self, name):
+        if type(name) is int:
+            name = self.codeToName(name)
 
-        if len(reg) == 3:
-            print('asdf')
-            return self.registers[reg]
-        else:
-            v = self.registers['e'+reg]
+        if name in list(self.registers.keys()):
+            return self.registers[name]
+        elif len(name) == 2:
+            suffix, name = name[1], 'e%sx' % name[0]
+            if suffix == 'x':
+                print(name)
+                print(int(str(self.registers[name]), 16))
+                print(self.registers[name] & 0xff)
+                return self.registers[name] & 0xFF
+            elif suffix == 'l':
+                return self.registers[name] & 0x0F
+            elif suffix == 'h':
+                return self.registers[name] & 0xF0
 
     def __repr__(self):
-        return repr(self.registers)
+        view = ["%s: 0x%0.6x" % (x, self.registers[x]) for x in self.registers.keys()]
+        view = "{%s}" % ', '.join(view)
+        return view

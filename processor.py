@@ -15,14 +15,13 @@ class Processor(object):
         # Initialize critical elements: registers, memory, etc
         self.debug = debug
         self.program_memory = []
-        self.main_memory = []
+        self.main_memory = [None] * 256
         self.registers = Registers()
 
     def load(self, filename):
       with open(filename, "rb") as f:
-        # Check file header
-        if (f.read(3) != b'\x84\x56\x49'):
-            raise exp.InvalidFile
+        # Eat file header
+        f.read(3)
 
         # Load our program byte by byte
         # Use next_byte closure to simplify the process of converting
@@ -37,14 +36,24 @@ class Processor(object):
         while next_byte():
             self.program_memory.append(byte)
 
+        self.check_header()
+
     def load_from_bytes(self, byte_array):
         self.program_memory = copy(byte_array)
+        self.check_header()
+
+    def check_header(self):
+        header = bytearray([self.program_memory.pop(0) for x in range(3)])
+        if header == bytearray(b'\x84\x56\x49'):
+            return True
+        raise exp.InvalidFile
 
     def run(self):
         self.program_scanner = ProgramScanner(self.program_memory, self.registers)
         self.ops = Operations(self.program_scanner, self.main_memory,
                               self.registers)
-        print(self.registers)
+        print("Program Memory:")
+        print(self.program_memory)
         while 1:
             try:
               opcode = self.program_scanner.nextOpcode()
@@ -52,5 +61,5 @@ class Processor(object):
               break
             op = self.ops.fromCode(opcode)
             op()
-            print(self.registers)
-        pass
+        print(self.main_memory)
+        print(self.registers)

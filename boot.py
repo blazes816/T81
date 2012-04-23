@@ -1,6 +1,7 @@
 #/usr/bin/python3
 from optparse import OptionParser
 from processor import Processor
+from assembler import Assembler
 import exceptions as exp
 
 
@@ -29,7 +30,7 @@ def main():
     
     try:
         if options.interpret:
-            processor.load_from_bytes(Parser.parse(filename))
+            processor.load_from_bytes(Assembler(filename).bytes())
         else:
             processor.load(filename)
     except exp.InvalidFile:

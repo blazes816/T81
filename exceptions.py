@@ -3,3 +3,12 @@ class InvalidFile(Exception):
 
 class EndOfProgram(Exception):
     pass
+    
+class AssemblyException(Exception):
+    pass
+
+class InvalidOperandSize(AssemblyException):
+    pass
+
+class InvalidOperandRegister(AssemblyException):
+    pass
