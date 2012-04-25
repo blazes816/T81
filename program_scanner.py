@@ -4,6 +4,8 @@ import exceptions as exp
 
 OPCODE_SIZE = 1
 REGISTER_SIZE = 1
+MEMORY_SIZE = 2
+
 DB_SIZE = 1
 DW_SIZE = 2
 DD_SIZE = 4
@@ -19,6 +21,9 @@ class ProgramScanner(object):
     def nextRegister(self):
       a = self.nextBytes(REGISTER_SIZE)
       return Registers.codeToName(a)
+
+    def nextMemory(self):
+      return self.nextBytes(MEMORY_SIZE)
 
     def nextBytes(self, size=1, pack=True):
       pc = self.registers.pc

@@ -9,8 +9,14 @@ class Assembler(object):
     def __init__(self, filename):
         self.filename = filename
         self.parser = TSM.parser()
-        self.code = bytearray(b'\x84\x56\x49')
+
+        self.header = bytearray(b'\x84\x56\x49') 
+        self.data = bytearray()
+        self.program = bytearray()
+        self.code = bytearray()
+
         self.variables = {}
+        self.labels = {}
         self.data_length = 0
         self.data_section = True
 
@@ -29,7 +35,7 @@ class Assembler(object):
                       if self.data_section is True:
                           self.data_section = False
                           for d in unpack_bytes(self.data_length, 2, 10)[::-1]:
-                              self.code.insert(3, d)
+                              self.data.insert(0, d)
 
                       el = el[0]
                       args = [x for x in el.elements[1:] if str(x) != ',']
@@ -40,39 +46,56 @@ class Assembler(object):
                       size = int(getattr(program_scanner, "%s_SIZE" % type(el.elements[0])))
                       args = getattr(Sanitizer, "Data")(args, size)
                       getattr(self, "Data")(*args)
+                    elif isinstance(el, Label):
+                        self.labels[str(el[0])] = len(self.program)
                 except exp.AssemblyException:
                   print('Assembly Error')
                   print(el)
                   raise
+        self.code.extend(self.header)
+        self.code.extend(self.data)
+        self.code.extend(self.program)
         print("Compilation complete")
 
     def Data(self, name, data):
-        self.variables[name] = {'start': len(self.code) - 3}
+        self.variables[name] = {'start': len(self.data)}
         for d in data:
             self.data_length += len(d)
-            self.code.extend(d)
+            self.data.extend(d)
 
     def MOV_R_R(self, args):
         a, b = args[0], args[1]
-        self.code.append(opToCode['mov_reg_reg'])
-        self.code.append(a)
-        self.code.append(b)
+        self.program.append(opToCode['mov_reg_reg'])
+        self.program.append(a)
+        self.program.append(b)
 
     def MOV_R_L(self, args):
         a, b = args[0], args[1]
-        self.code.append(opToCode['mov_reg_lit'])
-        self.code.append(a)
-        self.code.extend(b)
+        self.program.append(opToCode['mov_reg_lit'])
+        self.program.append(a)
+        self.program.extend(b)
 
     def MOV_M_R(self, args):
         a, b = args[0], args[1]
-        self.code.append(opToCode['mov_mem_reg'])
-        self.code.append(a)
+        self.program.append(opToCode['mov_mem_reg'])
+        self.program.append(a)
         if type(b) is bytearray:
-            self.code.extend(b)
+            self.program.extend(b)
         elif type(b) is VariableIdentifier:
             try:
-                self.code.extend(unpack_bytes(self.variables[str(b)]['start'], 2))
+                self.program.extend(unpack_bytes(self.variables[str(b)]['start'], 2))
+            except KeyError:
+                raise exp.UnknownVariable
+
+    def MOV_R_M(self, args):
+        a, b = args[0], args[1]
+        self.program.append(opToCode['mov_reg_mem'])
+        self.program.append(a)
+        if type(b) is bytearray:
+            self.program.extend(b)
+        elif type(b) is VariableIdentifier:
+            try:
+                self.program.extend(unpack_bytes(self.variables[str(b)]['start'], 2))
             except KeyError:
                 raise exp.UnknownVariable
 
@@ -85,9 +108,9 @@ class Assembler(object):
 
     def ADD_R_R(self, args):
         a, b = args[0], args[1]
-        self.code.append(opToCode['add_reg_reg'])
-        self.code.append(a)
-        self.code.append(b)
+        self.program.append(opToCode['add_reg_reg'])
+        self.program.append(a)
+        self.program.append(b)
 
 class Sanitizer(object):
     @staticmethod
@@ -130,6 +153,13 @@ class Sanitizer(object):
     @staticmethod
     def MOV_M_R(args):
         a, b = args[0], str(args[1])
+        if type(a) is MemoryLiteral:
+            a = unpack_bytes(clean_memory(str(a)), size=2)
+        return regToCode[b], a
+
+    @staticmethod
+    def MOV_R_M(args):
+        b, a = str(args[0]), args[1]
         if type(a) is MemoryLiteral:
             a = unpack_bytes(clean_memory(str(a)), size=2)
         return regToCode[b], a

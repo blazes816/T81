@@ -18,8 +18,14 @@ class MemoryLiteral(Grammar):
 
 
 
-class VariableIdentifier(Grammar):
+class Identifier(Grammar):
     grammar = (WORD('a-z_', 'a-zA-Z0-9_'))
+
+class VariableIdentifier(Grammar):
+    grammar = (Identifier)
+
+class Label(Grammar):
+    grammar = (Identifier, L(':'))
 
 
 class Register(Grammar):
@@ -37,6 +43,9 @@ class MOV_R_L(Grammar):
 class MOV_M_R(Grammar):
     grammar = (L('mov'), (MemoryLiteral | VariableIdentifier), L(','), Register)
 
+class MOV_R_M(Grammar):
+    grammar = (L('mov'), Register, L(','), (MemoryLiteral | VariableIdentifier))
+
 class PUSH_R(Grammar):
     grammar = (L('push'), Register)
 
@@ -46,15 +55,8 @@ class PUSH_L(Grammar):
 class ADD_R_R(Grammar):
     grammar = (L('add'), Register, L(','), Register)
 
-
-
 class Operation(Grammar):
-    grammar = (MOV_R_R | MOV_R_L | MOV_M_R | PUSH_R | PUSH_L | ADD_R_R, L(';'))
-
-class OperationsSection(Grammar):
-    grammar = (REPEAT(Operation, collapse=True))
-    grammar_collapse = True
-
+    grammar = (MOV_R_R | MOV_R_L | MOV_M_R | MOV_R_M | PUSH_R | PUSH_L | ADD_R_R, L(';'))
 
 class DB(Grammar):
     grammar = ('DB')
@@ -72,8 +74,17 @@ class Type(Grammar):
 class Data(Grammar):
     grammar = (Type, VariableIdentifier, LIST_OF(OctalLiteral, sep=','))
 
+class Comment(Grammar):
+    grammar = G(L('#'), ANY_EXCEPT(';'), L(';')) |\
+                G(L('/*'), ANY_EXCEPT('*/'), L('*/'))
+
+class OperationsSection(Grammar):
+    grammar = (REPEAT(Comment | Operation | Label, collapse=True))
+    grammar_collapse = True
+
+
 class DataSection(Grammar):
-    grammar = (REPEAT(Data, collapse=True))
+    grammar = (REPEAT(Comment | Data, collapse=True))
     grammar_collapse = True
 
 class TSM(Grammar):

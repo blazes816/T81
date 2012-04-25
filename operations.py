@@ -1,5 +1,5 @@
 from registers import Registers
-from utils import unpack_bytes
+from utils import unpack_bytes, pack_bytes
 
 codeToOperation = {
   0x0: 'mov_reg_reg',
@@ -27,7 +27,9 @@ class Operations(object):
 
     def mov_reg_mem(self):
         a = self.program_scanner.nextRegister()
-        b = self.program_scanner.nextRegister()
+        b = self.program_scanner.nextMemory()
+        b = self.memory[b:b + Registers.sizeOf(a)]
+        self.registers.set(a, pack_bytes(b))
 
     def mov_mem_reg(self):
         a = self.program_scanner.nextRegister()
