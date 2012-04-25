@@ -5,6 +5,7 @@ import exceptions as exp
 from operations import Operations
 from program_scanner import ProgramScanner
 from registers import Registers
+from utils import pack_bytes, unpack_bytes
 
 REGISTERS = {'eax': 0x00, 'ebx': 0x00, 'ecx': 0x00, 'edx': 0x0}
 OPCODE_SIZE = 1
@@ -15,7 +16,7 @@ class Processor(object):
         # Initialize critical elements: registers, memory, etc
         self.debug = debug
         self.program_memory = []
-        self.main_memory = {}
+        self.memory = bytearray()
         self.registers = Registers()
 
     def load(self, filename):
@@ -50,16 +51,26 @@ class Processor(object):
 
     def run(self):
         self.program_scanner = ProgramScanner(self.program_memory, self.registers)
-        self.ops = Operations(self.program_scanner, self.main_memory,
-                              self.registers)
+        self.ops = Operations(self.program_scanner, self.memory, self.registers)
+
+        data_size = self.program_scanner.nextBytes(2)
+        self.memory.extend(self.program_scanner.nextBytes(data_size, pack=False))
+
+        print("Main Memory")
+        print(self.memory)
+
         print("Program Memory:")
         print(self.program_memory)
+
         while 1:
             try:
               opcode = self.program_scanner.nextOpcode()
             except exp.EndOfProgram:
               break
+            print('Op: %d' % opcode)
             op = self.ops.fromCode(opcode)
             op()
-        print(self.main_memory)
+        print("Main Memory")
+        print(self.memory)
+
         print(self.registers)

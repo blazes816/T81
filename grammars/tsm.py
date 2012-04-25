@@ -13,8 +13,8 @@ class Literal(Grammar):
     grammar = (OctalLiteral | DecimalLiteral | BinaryLiteral)
     grammar_collapse = True
 
-class Memory(Grammar):
-    grammar = (OctalLiteral)
+class MemoryLiteral(Grammar):
+    grammar = (L('['), OctalLiteral, L(']'))
 
 
 
@@ -32,7 +32,7 @@ class MOV_R_L(Grammar):
     grammar = (L('mov'), Register, L(','), Literal)
 
 class MOV_M_R(Grammar):
-    grammar = (L('mov'), Memory, L(','), Register)
+    grammar = (L('mov'), MemoryLiteral, L(','), Register)
 
 class PUSH_R(Grammar):
     grammar = (L('push'), Register)
@@ -42,13 +42,36 @@ class PUSH_L(Grammar):
 
 
 
-class Command(Grammar):
+class Operation(Grammar):
     grammar = (MOV_R_R | MOV_R_L | MOV_M_R | PUSH_R | PUSH_L, L(';'))
-    grammar_collapse = True
 
 class OperationsSection(Grammar):
-    grammar = (REPEAT(Command, collapse=True))
+    grammar = (REPEAT(Operation, collapse=True))
+    grammar_collapse = True
+
+
+class VariableIdentifier(Grammar):
+    grammar = (WORD('a-z_', 'a-zA-Z0-9_'))
+
+class DB(Grammar):
+    grammar = ('DB')
+
+class DW(Grammar):
+    grammar = ('DD')
+
+class DD(Grammar):
+    grammar = ('DW')
+
+class Type(Grammar):
+    grammar = (DB | DW | DD)
+    grammar_collapse = True
+
+class Data(Grammar):
+    grammar = (Type, VariableIdentifier, LIST_OF(OctalLiteral, sep=','))
+
+class DataSection(Grammar):
+    grammar = (REPEAT(Data, collapse=True))
     grammar_collapse = True
 
 class TSM(Grammar):
-    grammar = (OperationsSection)
+    grammar = (OPTIONAL(DataSection), OperationsSection)

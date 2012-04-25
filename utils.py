@@ -9,14 +9,24 @@ def pack_bytes(byte_array):
     
     return int(reduce(lambda x, y: (x << 8) + y, byte_array[1:], byte_array[0]))
 
-def unpack_bytes(value, size=None):
+def unpack_bytes(value, size=1, base=16):
     byte_array = bytearray()
-    while int(str(value), 16) > 0:
-        byte_array.insert(0, value & 0xff)
+
+    if type(value) is str:
+        value = int(str(value), 16)
+
+    if value == 0:
+      return bytearray([0] * size)
+
+    while value > 0:
+        byte_array.append(value & 0xff)
         value = value >> 8
 
-    if size is not None:
+    if size != 1:
         while len(byte_array) < size:
             byte_array.append(0x0)
         
-    return byte_array
+    return byte_array[::-1]
+
+def clean_memory(memory):
+    return memory[1:-1]

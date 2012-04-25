@@ -67,11 +67,11 @@ class Registers(object):
         elif len(name) == 2:
             suffix, name = name[1], 'e%sx' % name[0]
             if suffix == 'x':
-                return self.registers[name] & 0xFF
+                return self.registers[name] & 0xFFFF
             elif suffix == 'l':
-                return self.registers[name] & 0x0F
+                return self.registers[name] & 0xFF
             elif suffix == 'h':
-                return self.registers[name] & 0xF0
+                return self.registers[name] & 0xFF00
 
     def __repr__(self):
         view = ["%s: 0x%0.6x" % (x, self.registers[x]) for x in self.registers.keys()]

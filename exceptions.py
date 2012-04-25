@@ -12,3 +12,6 @@ class InvalidOperandSize(AssemblyException):
 
 class InvalidOperandRegister(AssemblyException):
     pass
+
+class InvalidDataSize(AssemblyException):
+    pass
