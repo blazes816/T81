@@ -18,6 +18,9 @@ class MemoryLiteral(Grammar):
 
 
 
+class VariableIdentifier(Grammar):
+    grammar = (WORD('a-z_', 'a-zA-Z0-9_'))
+
 
 class Register(Grammar):
     grammar = (L('eax') | L('ax') | L('ah')| L('al') |\
@@ -32,7 +35,7 @@ class MOV_R_L(Grammar):
     grammar = (L('mov'), Register, L(','), Literal)
 
 class MOV_M_R(Grammar):
-    grammar = (L('mov'), MemoryLiteral, L(','), Register)
+    grammar = (L('mov'), (MemoryLiteral | VariableIdentifier), L(','), Register)
 
 class PUSH_R(Grammar):
     grammar = (L('push'), Register)
@@ -49,9 +52,6 @@ class OperationsSection(Grammar):
     grammar = (REPEAT(Operation, collapse=True))
     grammar_collapse = True
 
-
-class VariableIdentifier(Grammar):
-    grammar = (WORD('a-z_', 'a-zA-Z0-9_'))
 
 class DB(Grammar):
     grammar = ('DB')

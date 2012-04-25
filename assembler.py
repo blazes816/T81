@@ -33,12 +33,12 @@ class Assembler(object):
                   getattr(self, str(type(el)))(args)
                 elif isinstance(el, Data):
                   args = [x for x in el.elements[1:] if str(x) != ',']
-                  sanitizer = getattr(Sanitizer, "Data")
                   size = int(getattr(program_scanner, "%s_SIZE" % type(el.elements[0])))
-                  data = sanitizer(args, size)
-                  getattr(self, "Data")(data)
+                  args = getattr(Sanitizer, "Data")(args, size)
+                  getattr(self, "Data")(*args)
 
-    def Data(self, data):
+    def Data(self, name, data):
+        self.variables[name] = {'start': len(self.code) - 3}
         for d in data:
             self.data_length += len(d)
             self.code.extend(d)
@@ -59,7 +59,14 @@ class Assembler(object):
         a, b = args[0], args[1]
         self.code.append(opToCode['mov_mem_reg'])
         self.code.append(a)
-        self.code.extend(b)
+        if type(b) is bytearray:
+            self.code.extend(b)
+        elif type(b) is VariableIdentifier:
+            try:
+                self.code.extend(unpack_bytes(self.variables[str(b)]['start'], 2))
+            except KeyError:
+                raise exp.UnknownVariable
+
 
     def PUSH_R(self, args):
         pass
@@ -78,7 +85,7 @@ class Sanitizer(object):
             if len(unpacked) > size:
                 raise exp.InvalidDataSize
             clean_list.append(unpacked)
-        return clean_list
+        return a, clean_list
                     
         
     @staticmethod
@@ -109,8 +116,9 @@ class Sanitizer(object):
 
     @staticmethod
     def MOV_M_R(args):
-        a, b = clean_memory(str(args[0])), str(args[1])
-        a = unpack_bytes(a, size=Registers.sizeOf(b))
+        a, b = args[0], str(args[1])
+        if type(a) is MemoryLiteral:
+            a = unpack_bytes(clean_memory(str(a)), size=2)
         return regToCode[b], a
 
     @staticmethod

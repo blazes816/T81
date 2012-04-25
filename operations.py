@@ -30,11 +30,15 @@ class Operations(object):
 
     def mov_mem_reg(self):
         a = self.program_scanner.nextRegister()
-        b = self.program_scanner.nextBytes(Registers.sizeOf(a))
+        b = self.program_scanner.nextBytes(2)
         a = unpack_bytes(self.registers.get(a))
+        print('before')
+        print(self.memory)
         for byte in a:
             self.memory[b] = byte
             b += 1
+        print('after')
+        print(self.memory)
 
     def mov_reg_lit(self):
         a = self.program_scanner.nextRegister()

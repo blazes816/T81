@@ -4,4 +4,4 @@ DD test3 0x0000, 0x0102
 DW testf 0x00ffaaee, 0x00ffffaa
 mov ax, 0xffaa;
 mov [0x0], ax;
-mov bx, ax;
+mov test2, ax;

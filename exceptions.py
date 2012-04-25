@@ -15,3 +15,6 @@ class InvalidOperandRegister(AssemblyException):
 
 class InvalidDataSize(AssemblyException):
     pass
+
+class UnknownVariable(AssemblyException):
+    pass

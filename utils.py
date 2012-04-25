@@ -29,4 +29,4 @@ def unpack_bytes(value, size=1, base=16):
     return byte_array[::-1]
 
 def clean_memory(memory):
-    return memory[1:-1]
+    return int(str(memory[1:-1]), 16)
