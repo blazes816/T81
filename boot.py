@@ -28,7 +28,7 @@ def main():
     
     try:
         if filename[-3:] == 'tsm':
-            processor.load(Assembler(filename).code)
+            processor.load(Assembler(filename).code, name=filename)
         else:
             processor.load_from_file(filename)
     except exp.InvalidFile:

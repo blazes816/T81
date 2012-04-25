@@ -13,13 +13,17 @@ OPCODE_SIZE = 1
 class Processor(object):
 
     def __init__(self, debug=False):
+        self.name = "Untitled Program"
         # Initialize critical elements: registers, memory, etc
         self.debug = debug
         self.program_memory = bytearray()#[]
         self.memory = bytearray()
         self.registers = Registers()
 
-    def load(self, code):
+    def load(self, code, name=None):
+        if name is not None:
+            self.name = name
+
         get_bytes = lambda x: [code.pop(0) for i in range(x)]
 
         # Check file header
@@ -33,25 +37,7 @@ class Processor(object):
 
     def load_from_file(self, filename):
       with open(filename, "rb") as f:
-        self.load(f.read())
-        return
-        # Eat file header
-        f.read(3)
-
-        # Load our program byte by byte
-        # Use next_byte closure to simplify the process of converting
-        # from written binary to Python hex integer
-        byte = 0x00
-        def next_byte():
-            nonlocal byte
-            byte = f.read(1)
-            byte = hex(byte[0]) if len(byte) == 1 else None
-            return byte
-
-        while next_byte():
-            self.program_memory.append(byte)
-
-        self.check_header()
+        self.load(f.read(), name=filename)
 
     def check_header(self, header):
         if bytearray(header) != bytearray(b'\x84\x56\x49'):
@@ -61,21 +47,24 @@ class Processor(object):
         self.program_scanner = ProgramScanner(self.program_memory, self.registers)
         self.ops = Operations(self.program_scanner, self.memory, self.registers)
 
-        print("Main Memory")
-        print(self.memory)
+        print("\nInitial Configuration:")
+        print(self)
 
-        print("Program Memory:")
-        print(self.program_memory)
-
+        print("Executing: %s\n" % self.name) 
         while 1:
             try:
               opcode = self.program_scanner.nextOpcode()
             except exp.EndOfProgram:
               break
-            print('Op: %d' % opcode)
             op = self.ops.fromCode(opcode)
             op()
-        print("Main Memory")
-        print(self.memory)
 
-        print(self.registers)
+        print("Final Configuration:")
+        print(self)
+
+    def __repr__(self):
+        string = "\tMain Memory:\t%s\n" % str(self.memory)
+        string += "\tProgram Memory:\t%s\n" % str(self.program_memory)
+        string += "\tRegisters:\t%s\n" % str(self.registers)
+        return string
+        

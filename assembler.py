@@ -12,30 +12,39 @@ class Assembler(object):
         self.code = bytearray(b'\x84\x56\x49')
         self.variables = {}
         self.data_length = 0
+        self.data_section = True
+
         self.parse()
         self.compile()
     
     def parse(self):
         self.tree = self.parser.parse_file(self.filename) 
+        print("Parsing complete")
 
     def compile(self):
-        data_section = True
         for tree in self.tree:
             for el in tree.elements:
-                if isinstance(el, Operation):
-                  if data_section is True:
-                      data_section = False
-                      for d in unpack_bytes(self.data_length, 2, 10)[::-1]:
-                          self.code.insert(3, d)
-                  el = el[0]
-                  args = [x for x in el.elements[1:] if str(x) != ',']
-                  args = getattr(Sanitizer, str(type(el)))(args)
-                  getattr(self, str(type(el)))(args)
-                elif isinstance(el, Data):
-                  args = [x for x in el.elements[1:] if str(x) != ',']
-                  size = int(getattr(program_scanner, "%s_SIZE" % type(el.elements[0])))
-                  args = getattr(Sanitizer, "Data")(args, size)
-                  getattr(self, "Data")(*args)
+                try:
+                    if isinstance(el, Operation):
+                      if self.data_section is True:
+                          self.data_section = False
+                          for d in unpack_bytes(self.data_length, 2, 10)[::-1]:
+                              self.code.insert(3, d)
+
+                      el = el[0]
+                      args = [x for x in el.elements[1:] if str(x) != ',']
+                      args = getattr(Sanitizer, str(type(el)))(args)
+                      getattr(self, str(type(el)))(args)
+                    elif isinstance(el, Data):
+                      args = [x for x in el.elements[1:] if str(x) != ',']
+                      size = int(getattr(program_scanner, "%s_SIZE" % type(el.elements[0])))
+                      args = getattr(Sanitizer, "Data")(args, size)
+                      getattr(self, "Data")(*args)
+                except exp.AssemblyException:
+                  print('Assembly Error')
+                  print(el)
+                  raise
+        print("Compilation complete")
 
     def Data(self, name, data):
         self.variables[name] = {'start': len(self.code) - 3}
@@ -74,6 +83,12 @@ class Assembler(object):
     def PUSH_L(self, args):
         pass
 
+    def ADD_R_R(self, args):
+        a, b = args[0], args[1]
+        self.code.append(opToCode['add_reg_reg'])
+        self.code.append(a)
+        self.code.append(b)
+
 class Sanitizer(object):
     @staticmethod
     def Data(args, size=1):
@@ -106,10 +121,8 @@ class Sanitizer(object):
         elif type(args[1]) is BinaryLiteral:
             b = int(str(args[1][0]), 2)
         
-        b = unpack_bytes(b)
-        b_hex = ''.join(''.join([hex(x) for x in b]).split('0x'))
-
-        if (len(b_hex) / 2) + 0.5 < Registers.sizeOf(a):
+        b = unpack_bytes(b, Registers.sizeOf(a))
+        if len(b) > Registers.sizeOf(a):
             raise exp.InvalidOperandSize
             
         return regToCode[a], b
@@ -127,4 +140,20 @@ class Sanitizer(object):
 
     @staticmethod
     def PUSH_L(args):
+        pass
+
+    @staticmethod
+    def ADD_R_R(args):
+        a, b = str(args[0]), str(args[1])
+
+        if Registers.sizeOf(a) != Registers.sizeOf(b):
+            raise exp.RegisterSizeMismatch
+
+        try:
+            return regToCode[str(args[0])], regToCode[str(args[1])]
+        except KeyError:
+            raise exp.InvalidOperandRegister
+
+    @staticmethod
+    def ADD_R_L(args):
         pass

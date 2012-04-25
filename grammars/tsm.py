@@ -43,10 +43,13 @@ class PUSH_R(Grammar):
 class PUSH_L(Grammar):
     grammar = (L('push'), Literal)
 
+class ADD_R_R(Grammar):
+    grammar = (L('add'), Register, L(','), Register)
+
 
 
 class Operation(Grammar):
-    grammar = (MOV_R_R | MOV_R_L | MOV_M_R | PUSH_R | PUSH_L, L(';'))
+    grammar = (MOV_R_R | MOV_R_L | MOV_M_R | PUSH_R | PUSH_L | ADD_R_R, L(';'))
 
 class OperationsSection(Grammar):
     grammar = (REPEAT(Operation, collapse=True))

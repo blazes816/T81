@@ -5,7 +5,8 @@ codeToOperation = {
   0x0: 'mov_reg_reg',
   0x1: 'mov_reg_mem',
   0x2: 'mov_mem_reg',
-  0x3: 'mov_reg_lit'
+  0x3: 'mov_reg_lit',
+  0x4: 'add_reg_reg',
 }
 operationToCode = {codeToOperation[x]: x for x in codeToOperation}
 
@@ -40,3 +41,9 @@ class Operations(object):
         a = self.program_scanner.nextRegister()
         b = self.program_scanner.nextBytes(Registers.sizeOf(a))
         self.registers.set(a, b)
+
+    def add_reg_reg(self):
+        a = self.program_scanner.nextRegister()
+        b = self.program_scanner.nextRegister()
+        c = self.registers.get(a) + self.registers.get(b)
+        self.registers.set(a, c)

@@ -5,3 +5,5 @@ DW testf 0x00ffaaee, 0x00ffffaa
 mov ax, 0xffaa;
 mov [0x0], ax;
 mov test2, ax;
+mov bx, 0x0002;
+add ax, bx;

@@ -18,3 +18,9 @@ class InvalidDataSize(AssemblyException):
 
 class UnknownVariable(AssemblyException):
     pass
+
+class RegisterSizeMismatch(AssemblyException):
+    pass
+
+class InvalidDataSectionPlacement(AssemblyException):
+    pass
