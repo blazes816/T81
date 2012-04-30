@@ -1,8 +1,23 @@
-DB test 0x0, 0x1, 0x2
-DB test2 0x01, 0x11, 0x2f
-DD test3 0x0000, 0x0102
-DW testf 0x00ffaaee, 0x00ffffaa
-mov ax, test2;
-mov bx, 0x0002;
-label1:
-add ax, bx;
+DB prompt 80d, 108d, 101d, 97d, 115d, 101d, 32d, 101d, 110d, 116d, 101d, 114d, 32d, 97d, 110d, 32d,
+        105d, 110d, 116d, 101d, 103d, 101d, 114d, 32d, 110d, 44d, 32d, 115d, 117d, 99d, 104d, 32d,
+        116d, 104d, 97d, 116d, 32d, 50d, 32d, 60d, 61d, 32d, 110d, 32d, 60d, 61d, 32d, 56d, 58d, 0x00
+
+# Print prompt;
+mov ax, prompt;
+int 0x00;
+
+# Get integer;
+int 0x10;
+mov dx, ax;
+
+sub ax, 0x01;
+mov bx, dx;
+
+factorial:
+  sub dx, 0x01;
+  sub ax, 0x01;
+  mul bx, dx;
+jmpnz factorial;
+
+mov ax, bx;
+int 0x01;

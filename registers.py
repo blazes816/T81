@@ -9,6 +9,14 @@ codeToName = {
   0x05: 'bx',
   0x06: 'bh',
   0x07: 'bl',
+  0x08: 'ecx',
+  0x09: 'cx',
+  0x0a: 'ch',
+  0x0b: 'cl',
+  0x0c: 'edx',
+  0x0d: 'dx',
+  0x0e: 'dh',
+  0x0f: 'dl',
 }
 nameToCode = {codeToName[x]: x for x in codeToName}
 
@@ -24,6 +32,14 @@ class Registers(object):
         elif reg[1] == 'x':
             return 2
         return 1
+
+    @staticmethod
+    def nextSize(reg):
+        if len(reg) == 2:
+            if reg[1] == 'h' or reg[1] == 'l':
+                return "%s%s" % reg[0], 'x'
+            else:
+                return "e%sx" % reg[0]
 
     def __init__(self):
         self.eax = 0
@@ -57,6 +73,8 @@ class Registers(object):
                 self.registers[name] = (self.registers[name] & 0xffffff00) + value
             elif suffix == 'h':
                 self.registers[name] = (self.registers[name] & 0xffff00ff) + (value << 8)
+            else:
+                self.registers[name] = value
 
     def get(self, name):
         if type(name) is int:

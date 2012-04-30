@@ -24,3 +24,6 @@ class RegisterSizeMismatch(AssemblyException):
 
 class InvalidDataSectionPlacement(AssemblyException):
     pass
+
+class InvalidInterrupt(AssemblyException):
+    pass

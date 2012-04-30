@@ -13,6 +13,7 @@ DD_SIZE = 4
 class ProgramScanner(object):
     def __init__(self, memory, registers):
       self.memory = memory
+      self.length = len(memory)
       self.registers = registers
 
     def nextOpcode(self):
@@ -28,12 +29,8 @@ class ProgramScanner(object):
     def nextBytes(self, size=1, pack=True):
       pc = self.registers.pc
 
-      if pc >= len(self.memory):
-          raise exp.EndOfProgram
-
       byte = self.memory[pc:pc + size]
       self.registers.incrementPC(size)
-
       if pack is True:
           return utils.pack_bytes(byte)
       return byte

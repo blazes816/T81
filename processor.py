@@ -19,6 +19,7 @@ class Processor(object):
         self.program_memory = bytearray()#[]
         self.memory = bytearray()
         self.registers = Registers()
+        self.running = True
 
     def load(self, code, name=None):
         if name is not None:
@@ -34,6 +35,7 @@ class Processor(object):
             self.memory.append(code.pop(0))
 
         self.program_memory.extend(code)
+        self.last_op_index = len(self.program_memory) - 1
 
     def load_from_file(self, filename):
       with open(filename, "rb") as f:
@@ -47,20 +49,12 @@ class Processor(object):
         self.program_scanner = ProgramScanner(self.program_memory, self.registers)
         self.ops = Operations(self.program_scanner, self.memory, self.registers)
 
-        print("\nInitial Configuration:")
-        print(self)
-
-        print("Executing: %s\n" % self.name) 
-        while 1:
-            try:
-              opcode = self.program_scanner.nextOpcode()
-            except exp.EndOfProgram:
-              break
+        while self.running:
+            opcode = self.program_scanner.nextOpcode()
             op = self.ops.fromCode(opcode)
             op()
-
-        print("Final Configuration:")
-        print(self)
+            if self.registers.pc > self.last_op_index:
+                self.running = False
 
     def __repr__(self):
         string = "\tMain Memory:\t%s\n" % str(self.memory)
